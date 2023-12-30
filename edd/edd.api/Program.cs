@@ -1,7 +1,11 @@
+using CorrelationId;
+using CorrelationId.DependencyInjection;
 using edd.api.Business.BillService;
 using edd.api.Business.EmailService;
 using edd.api.Business.VisitService;
 using MassTransit;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using Serilog;
 using Serilog.Events;
 
@@ -13,11 +17,30 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddDefaultCorrelationId(ctx =>
+{
+    ctx.UpdateTraceIdentifier = true;
+});
+
+builder.Services.AddOpenTelemetry()
+            .ConfigureResource(r => r.AddService("edd.api"))
+            .WithTracing(builder =>
+            {
+                builder.AddAspNetCoreInstrumentation();
+                builder.AddHttpClientInstrumentation();
+                builder.AddSource("MassTransit");
+                builder.AddOtlpExporter(otlpOptions =>
+                {
+                    otlpOptions.Endpoint = new Uri("http://localhost:4317");
+                });
+            });
+
 builder.Services.AddScoped<IVisitRegisterBusiness, VisitRegisterBusiness>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 builder.Services.AddMassTransit(x =>
 {
-    x.SetKebabCaseEndpointNameFormatter();
+    x.SetSnakeCaseEndpointNameFormatter();
 
     // publish
     x.AddConsumer<SendEmailToDoctorBusiness>();
@@ -64,6 +87,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+app.UseCorrelationId();
 
 app.UseHttpsRedirection();
 

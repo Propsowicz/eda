@@ -15,7 +15,7 @@ namespace edd.api.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Register(VisitEntity request)
+        public async Task<IActionResult> Register(VisitRequestModel request)
         {
             await _registerBusiness.CommandHandler(request);
 

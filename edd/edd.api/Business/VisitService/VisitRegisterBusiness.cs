@@ -1,4 +1,5 @@
-﻿using csStorage.Builder.csContextBuilder;
+﻿using CorrelationId.Abstractions;
+using csStorage.Builder.csContextBuilder;
 using edd.api.EventModels;
 using MassTransit;
 
@@ -9,16 +10,22 @@ namespace edd.api.Business.VisitService
         private readonly ISendEndpointProvider _sendEndpointProvider;
         private readonly IPublishEndpoint _publishEndpoint;
         private readonly csContextBuilder<VisitEntity> _contextBuilder;
+        private readonly ICorrelationContextAccessor _correlationContext;
 
-        public VisitRegisterBusiness(ISendEndpointProvider sendEndpointProvider, IPublishEndpoint publishEndpoint)
+        public VisitRegisterBusiness(ISendEndpointProvider sendEndpointProvider, IPublishEndpoint publishEndpoint, 
+            ICorrelationContextAccessor correlationContext)
         {
             _sendEndpointProvider = sendEndpointProvider;
             _publishEndpoint = publishEndpoint;
             _contextBuilder = new csContextBuilder<VisitEntity>();
+            _correlationContext = correlationContext;
         }
 
-        public async Task CommandHandler(VisitEntity entity)
+        public async Task CommandHandler(VisitRequestModel request)
         {
+            var entity = VisitEntity.Create(request.VisitDate, request.PatientName, request.PatientEmail, 
+                request.DoctorName, request.VisitPrice, request.HospitalName);
+
             if (await SaveVisitModel(entity))
             {
                 await PublishVisitRegistration(entity);
@@ -30,7 +37,6 @@ namespace edd.api.Business.VisitService
         {
             try
             {
-                entity.Id = Guid.NewGuid();
                 await _contextBuilder.AddAsync(entity);
                 return true;
             }
@@ -45,8 +51,9 @@ namespace edd.api.Business.VisitService
         {
             await _publishEndpoint.Publish<VisitRegisteredPublishModel>(new VisitRegisteredPublishModel
             {
+                CorrelationId = Guid.Parse(_correlationContext.CorrelationContext.CorrelationId),
                 Message = $"New visit was registered. Patient {entity.PatientName} visit {entity.HospitalName} hospital on {entity.VisitDate} to meet with {entity.DoctorName}."
-            });
+            });;
 
         }
 
@@ -55,6 +62,7 @@ namespace edd.api.Business.VisitService
             var sendEndpoint = await _sendEndpointProvider.GetSendEndpoint(new Uri("queue:send_visit_registered"));
             await sendEndpoint.Send<VisitRegisteredSendModel>(new VisitRegisteredSendModel
             {
+                CorrelationId = Guid.Parse(_correlationContext.CorrelationContext.CorrelationId),
                 VisitEntity = entity
             });
         }

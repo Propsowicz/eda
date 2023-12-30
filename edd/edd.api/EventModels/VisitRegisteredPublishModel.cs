@@ -1,7 +1,11 @@
-﻿namespace edd.api.EventModels
+﻿using MassTransit;
+
+namespace edd.api.EventModels
 {
-    public class VisitRegisteredPublishModel
+    public class VisitRegisteredPublishModel : CorrelatedBy<Guid>
     {
         public string Message { get; set; }
+
+        public Guid CorrelationId { get; set; }
     }
 }

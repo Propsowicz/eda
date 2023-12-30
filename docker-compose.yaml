@@ -1,0 +1,16 @@
+version: '3.8'
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: 'rabbitmq'
+    ports:
+      - 5672:5672
+      - 15672:15672
+
+  jaegertracing:
+    image: jaegertracing/opentelemetry-all-in-one
+    container_name: 'jaegertracing'
+    ports:
+      - 16686:16686
+      - 4317:4317
+      - 13133:13133
