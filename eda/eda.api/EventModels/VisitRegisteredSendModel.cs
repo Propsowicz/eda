@@ -1,7 +1,7 @@
-﻿using edd.api.Business.VisitService;
+﻿using eda.api.Business.VisitService;
 using MassTransit;
 
-namespace edd.api.EventModels
+namespace eda.api.EventModels
 {
     public class VisitRegisteredSendModel : CorrelatedBy<Guid>
     {

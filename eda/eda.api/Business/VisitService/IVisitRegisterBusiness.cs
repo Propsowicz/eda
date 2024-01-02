@@ -1,4 +1,4 @@
-﻿namespace edd.api.Business.VisitService
+﻿namespace eda.api.Business.VisitService
 {
     public interface IVisitRegisterBusiness
     {

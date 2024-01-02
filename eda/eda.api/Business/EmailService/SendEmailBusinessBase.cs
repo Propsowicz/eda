@@ -1,6 +1,6 @@
 ﻿using Serilog;
 
-namespace edd.api.Business.EmailService
+namespace eda.api.Business.EmailService
 {
     public abstract class SendEmailBusinessBase
     {

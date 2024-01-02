@@ -1,7 +1,7 @@
-﻿using edd.api.EventModels;
+﻿using eda.api.EventModels;
 using MassTransit;
 
-namespace edd.api.Business.EmailService
+namespace eda.api.Business.EmailService
 {
     public class SendReturnEmailBusiness : SendEmailBusinessBase, IConsumer<VisitRegisteredSendModel>
     {

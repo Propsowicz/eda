@@ -1,6 +1,6 @@
 ﻿using MassTransit;
 
-namespace edd.api.EventModels
+namespace eda.api.EventModels
 {
     public class VisitRegisteredPublishModel : CorrelatedBy<Guid>
     {

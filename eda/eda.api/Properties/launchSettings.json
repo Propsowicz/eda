@@ -9,7 +9,7 @@
     }
   },
   "profiles": {
-    "edd.api": {
+    "eda.api": {
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": true,

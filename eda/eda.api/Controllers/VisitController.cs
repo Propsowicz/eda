@@ -1,7 +1,7 @@
-﻿using edd.api.Business.VisitService;
+﻿using eda.api.Business.VisitService;
 using Microsoft.AspNetCore.Mvc;
 
-namespace edd.api.Controllers
+namespace eda.api.Controllers
 {
     [ApiController]
     [Route("[controller]")]

@@ -1,4 +1,4 @@
-﻿namespace edd.api.Business.EmailService
+﻿namespace eda.api.Business.EmailService
 {
     public interface IEmailService
     {

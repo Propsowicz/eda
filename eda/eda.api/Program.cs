@@ -1,8 +1,8 @@
 using CorrelationId;
 using CorrelationId.DependencyInjection;
-using edd.api.Business.BillService;
-using edd.api.Business.EmailService;
-using edd.api.Business.VisitService;
+using eda.api.Business.BillService;
+using eda.api.Business.EmailService;
+using eda.api.Business.VisitService;
 using MassTransit;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
@@ -23,7 +23,7 @@ builder.Services.AddDefaultCorrelationId(ctx =>
 });
 
 builder.Services.AddOpenTelemetry()
-            .ConfigureResource(r => r.AddService("edd.api"))
+            .ConfigureResource(r => r.AddService("eda.api"))
             .WithTracing(builder =>
             {
                 builder.AddAspNetCoreInstrumentation();

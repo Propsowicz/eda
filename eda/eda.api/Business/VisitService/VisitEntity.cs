@@ -1,7 +1,7 @@
 ﻿using csStorage.Base.csEntityBaseModel;
 using csStorage.Shared;
 
-namespace edd.api.Business.VisitService
+namespace eda.api.Business.VisitService
 {
     public class VisitEntity : csEntityBaseModel<VisitEntity>
     {

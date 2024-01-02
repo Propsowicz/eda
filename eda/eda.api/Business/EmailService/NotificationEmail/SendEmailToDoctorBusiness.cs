@@ -1,8 +1,8 @@
-﻿using edd.api.Business.EmailService.NotificationEmail;
-using edd.api.EventModels;
+﻿using eda.api.Business.EmailService.NotificationEmail;
+using eda.api.EventModels;
 using MassTransit;
 
-namespace edd.api.Business.EmailService
+namespace eda.api.Business.EmailService
 {
     public class SendEmailToDoctorBusiness : BaseNotificationEmailBusiness
     {

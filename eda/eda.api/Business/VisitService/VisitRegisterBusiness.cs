@@ -1,9 +1,9 @@
 ﻿using CorrelationId.Abstractions;
 using csStorage.Builder.csContextBuilder;
-using edd.api.EventModels;
+using eda.api.EventModels;
 using MassTransit;
 
-namespace edd.api.Business.VisitService
+namespace eda.api.Business.VisitService
 {
     public class VisitRegisterBusiness : IVisitRegisterBusiness
     {

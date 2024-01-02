@@ -1,7 +1,7 @@
-﻿using edd.api.EventModels;
+﻿using eda.api.EventModels;
 using MassTransit;
 
-namespace edd.api.Business.BillService
+namespace eda.api.Business.BillService
 {
     public class BillServiceBusiness : IConsumer<VisitRegisteredSendModel>
     {

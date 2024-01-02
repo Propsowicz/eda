@@ -1,7 +1,7 @@
-﻿using edd.api.EventModels;
+﻿using eda.api.EventModels;
 using MassTransit;
 
-namespace edd.api.Business.EmailService.NotificationEmail
+namespace eda.api.Business.EmailService.NotificationEmail
 {
     public abstract class BaseNotificationEmailBusiness : IConsumer<VisitRegisteredPublishModel>
     {
