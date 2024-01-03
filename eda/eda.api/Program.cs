@@ -1,8 +1,11 @@
 using CorrelationId;
 using CorrelationId.DependencyInjection;
-using eda.api.Business.BillService;
-using eda.api.Business.EmailService;
-using eda.api.Business.VisitService;
+using eda.api.Services.EmailService;
+using eda.api.Services.EmailService.EmailToPatient;
+using eda.api.Services.EmailService.NotificationEmail;
+using eda.api.Services.PaymentService;
+using eda.api.Services.PaymentService.CQRS;
+using eda.api.Services.VisitService;
 using MassTransit;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
@@ -29,47 +32,69 @@ builder.Services.AddOpenTelemetry()
                 builder.AddAspNetCoreInstrumentation();
                 builder.AddHttpClientInstrumentation();
                 builder.AddSource("MassTransit");
-                builder.AddOtlpExporter(otlpOptions =>
+                builder.AddOtlpExporter(otelOptions =>
                 {
-                    otlpOptions.Endpoint = new Uri("http://localhost:4317");
+                    otelOptions.Endpoint = new Uri("http://localhost:4317");
                 });
             });
 
 builder.Services.AddScoped<IVisitRegisterBusiness, VisitRegisterBusiness>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 
+builder.Services.AddMediator(cfg =>
+{
+    cfg.AddConsumer<PaymentQuery>();
+    cfg.AddConsumer<PaymentCommand>();
+
+});
+
 builder.Services.AddMassTransit(x =>
 {
     x.SetSnakeCaseEndpointNameFormatter();
 
     // publish
-    x.AddConsumer<SendEmailToDoctorBusiness>();
-    x.AddConsumer<SendEmailToHospitalBusiness>();
+    x.AddConsumer<SendNotificationEmailToDoctorBusiness>();
+    x.AddConsumer<SendNotificationEmailToHospitalBusiness>();
 
-    //send
-    x.AddConsumer<BillServiceBusiness>();
-    x.AddConsumer<SendReturnEmailBusiness>();
+    // send
+    x.AddConsumer<PaymentCalculateBusiness>();
+    x.AddConsumer<PaymentExpirationPaymentCheckBusiness>();
+    x.AddConsumer<SendEmailToPatientBusiness>();
 
+    x.AddDelayedMessageScheduler();
 
-    //docker: https://code-maze.com/masstransit-rabbitmq-aspnetcore/
     x.UsingRabbitMq((ctx, cfg) =>
     {
-        cfg.ReceiveEndpoint("publish_visit_registered", e =>
+        cfg.UseDelayedMessageScheduler();
+
+        cfg.ReceiveEndpoint("publish_visit_notification_event", e =>
         {
-            e.ConfigureConsumer<SendEmailToDoctorBusiness>(ctx);
-            e.ConfigureConsumer<SendEmailToHospitalBusiness>(ctx);
+            e.ConfigureConsumer<SendNotificationEmailToDoctorBusiness>(ctx);
+            e.ConfigureConsumer<SendNotificationEmailToHospitalBusiness>(ctx);
             e.UseRawJsonSerializer();
         });
 
-        cfg.ReceiveEndpoint("send_visit_registered", e =>
+        cfg.ReceiveEndpoint("send_calculate_visit_bill_command", e =>
         {
-            e.ConfigureConsumer<BillServiceBusiness>(ctx);
+            e.ConfigureConsumer<PaymentCalculateBusiness>(ctx);
             e.UseRawJsonSerializer();
         });
 
-        cfg.ReceiveEndpoint("send_visit_registered_return_email", e =>
+        cfg.ReceiveEndpoint("send_send_payment_expiration_check_command", e =>
         {
-            e.ConfigureConsumer<SendReturnEmailBusiness>(ctx);
+            e.ConfigureConsumer<PaymentExpirationPaymentCheckBusiness>(ctx);
+            e.UseRawJsonSerializer();
+        });
+        
+        cfg.ReceiveEndpoint("send_visit_registered_return_email_command", e =>
+        {
+            e.ConfigureConsumer<SendEmailToPatientBusiness>(ctx);
+            e.UseRawJsonSerializer();
+        });        
+        
+        cfg.ReceiveEndpoint("send_visit_cancelled_email_command", e =>
+        {
+            e.ConfigureConsumer<SendEmailToPatientBusiness>(ctx);
             e.UseRawJsonSerializer();
         });
     });

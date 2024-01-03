@@ -20,6 +20,9 @@ nupkg/
 # Code Rush
 .cr/
 
+# csStorage
+csStorage/
+
 # User-specific files
 *.suo
 *.user

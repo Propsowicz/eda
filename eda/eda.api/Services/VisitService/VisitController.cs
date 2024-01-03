@@ -1,7 +1,7 @@
-﻿using eda.api.Business.VisitService;
+﻿using eda.api.Services.VisitService.Models;
 using Microsoft.AspNetCore.Mvc;
 
-namespace eda.api.Controllers
+namespace eda.api.Services.VisitService
 {
     [ApiController]
     [Route("[controller]")]
@@ -17,9 +17,7 @@ namespace eda.api.Controllers
         [HttpPost]
         public async Task<IActionResult> Register(VisitRequestModel request)
         {
-            await _registerBusiness.CommandHandler(request);
-
-            return Ok();
+            return Ok(await _registerBusiness.CommandHandler(request));
         }
     }
 }
