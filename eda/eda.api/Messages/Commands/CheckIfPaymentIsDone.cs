@@ -6,6 +6,6 @@ namespace eda.api.Messages.Commands
     {
         public Guid CorrelationId { get; set; }
 
-        public Guid BillId { get; set; }
+        public Guid PaymentId { get; set; }
     }
 }

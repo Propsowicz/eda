@@ -41,7 +41,7 @@ namespace eda.api.Services.VisitService
             {
                 var correlationId = Guid.Parse(_correlationContext.CorrelationContext.CorrelationId);
                 await PublishVisitRegistrationEvent(entity, correlationId);
-                await SendCalculateVisitBillCommand(entity, correlationId);
+                await SendCalculateVisitPriceCommand(entity, correlationId);
             }
             return entity.Id;
         }
@@ -72,10 +72,10 @@ namespace eda.api.Services.VisitService
             });
         }
 
-        private async Task SendCalculateVisitBillCommand(VisitEntity entity, Guid correlationId)
+        private async Task SendCalculateVisitPriceCommand(VisitEntity entity, Guid correlationId)
         {
-            var sendEndpoint = await _sendEndpointProvider.GetSendEndpoint(new Uri("queue:send_calculate_visit_bill_command"));
-            await sendEndpoint.Send<CalculateVisitBill>(new
+            var sendEndpoint = await _sendEndpointProvider.GetSendEndpoint(new Uri("queue:calculate_visit_price_command"));
+            await sendEndpoint.Send<CalculateVisitPrice>(new
             {
                 CorrelationId = correlationId,
                 VisitId = entity.Id

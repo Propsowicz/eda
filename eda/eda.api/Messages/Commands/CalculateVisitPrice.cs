@@ -2,7 +2,7 @@
 
 namespace eda.api.Messages.Commands
 {
-    public class CalculateVisitBill : CorrelatedBy<Guid>
+    public class CalculateVisitPrice : CorrelatedBy<Guid>
     {
         public Guid CorrelationId { get; set; }
 

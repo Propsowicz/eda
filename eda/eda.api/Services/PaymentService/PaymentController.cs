@@ -17,20 +17,20 @@ namespace eda.api.Services.PaymentService
         }
 
         [HttpGet]
-        public async Task<IActionResult> Get(Guid paymentEntityId)
+        public async Task<IActionResult> Get(Guid paymentId)
         {
             return Ok(await _mediator.SendRequest(new PaymentQueryRequestModel
             {
-                Id = paymentEntityId,
+                Id = paymentId,
             }));
         }
 
         [HttpPost]
-        public async Task<IActionResult> Pay(Guid paymentEntityId)
+        public async Task<IActionResult> Pay(Guid paymentId)
         {
             return Ok(await _mediator.SendRequest(new PaymentCommandRequestModel
             {
-                Id = paymentEntityId,
+                Id = paymentId,
             }));
         }
     }

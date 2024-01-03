@@ -22,9 +22,9 @@ namespace eda.api.Services.EmailService.NotificationEmail
 
         public async Task Consume(ConsumeContext<VisitCancelled> context)
         {
-            _emailService.SendEmail(GetToEmail(context), VisitPaymentExpiredMessage(context));
+            _emailService.SendEmail(GetToEmail(context), VisitCancelledMessage(context));
         }
-        public string VisitPaymentExpiredMessage(ConsumeContext<VisitCancelled> context)
+        public string VisitCancelledMessage(ConsumeContext<VisitCancelled> context)
         {
             return $"Visit of patient {context.Message.PatientName} in {context.Message.HospitalName} hospital on {context.Message.VisitDate} has been cancelled due to the {context.Message.CancellationReason}.";
         }

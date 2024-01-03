@@ -19,7 +19,7 @@ namespace eda.api.Services.PaymentService
 
         public async Task Consume(ConsumeContext<CheckIfPaymentIsDone> context)
         {
-            var paymentEntity = _contextPaymentEntityBuilder.Get().First(x => x.Id == context.Message.BillId);
+            var paymentEntity = _contextPaymentEntityBuilder.Get().First(x => x.Id == context.Message.PaymentId);
 
             if (!paymentEntity.IsPayed)
             {

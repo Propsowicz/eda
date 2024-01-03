@@ -9,9 +9,7 @@
         public string PatientEmail { get; set; } = default!;
 
         public string DoctorName { get; set; } = default!;
-
-        public int VisitPrice { get; set; }
-
+        
         public string HospitalName { get; set; } = default!;
     }
 }

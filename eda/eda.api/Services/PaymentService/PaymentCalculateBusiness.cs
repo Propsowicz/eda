@@ -5,26 +5,26 @@ using MassTransit;
 
 namespace eda.api.Services.PaymentService
 {
-    public class PaymentCalculateBusiness : IConsumer<CalculateVisitBill>
+    public class PaymentCalculateBusiness : IConsumer<CalculateVisitPrice>
     {
         private readonly int _expirationSeconds = 60;
 
         private readonly csContextBuilder<VisitEntity> _contextVisitEntityBuilder;
-        private readonly csContextBuilder<PaymentEntity> _contextBillEntityBuilder;
+        private readonly csContextBuilder<PaymentEntity> _contextPaymentEntityBuilder;
 
         public PaymentCalculateBusiness()
         {
             _contextVisitEntityBuilder = new csContextBuilder<VisitEntity>();
-            _contextBillEntityBuilder = new csContextBuilder<PaymentEntity>();
+            _contextPaymentEntityBuilder = new csContextBuilder<PaymentEntity>();
         }
 
-        public async Task Consume(ConsumeContext<CalculateVisitBill> context)
+        public async Task Consume(ConsumeContext<CalculateVisitPrice> context)
         {
             var visitEntity = _contextVisitEntityBuilder.Get().First(x => x.Id == context.Message.VisitId);
             var visitPrice = CalculatePrice();
             var dateOfPayment = DateTime.UtcNow.AddSeconds(_expirationSeconds);
 
-            var billEntity = new PaymentEntity
+            var paymentEntity = new PaymentEntity
             {
                 Id = Guid.NewGuid(),
                 VisitId = visitEntity.Id,
@@ -32,21 +32,21 @@ namespace eda.api.Services.PaymentService
                 DateOfPayment = dateOfPayment,
                 IsPayed = false
             };
-            await _contextBillEntityBuilder.AddAsync(billEntity);
+            await _contextPaymentEntityBuilder.AddAsync(paymentEntity);
 
-            await SendVisitRegisteredReturnEmailCommand(context, visitEntity, billEntity);
-            await SendPaymentExpirationCheckCommand(context, billEntity);
+            await SendVisitRegisteredReturnEmailCommand(context, visitEntity, paymentEntity);
+            await SendPaymentExpirationCheckCommand(context, paymentEntity);
         }
 
-        private static async Task SendPaymentExpirationCheckCommand(ConsumeContext<CalculateVisitBill> context, PaymentEntity paymentEntity)
+        private static async Task SendPaymentExpirationCheckCommand(ConsumeContext<CalculateVisitPrice> context, PaymentEntity paymentEntity)
         {
-            await context.ScheduleSend<CheckIfPaymentIsDone>(new Uri("queue:send_send_payment_expiration_check_command"), paymentEntity.DateOfPayment, new
+            await context.ScheduleSend<CheckIfPaymentIsDone>(new Uri("queue:check_if_payment_is_done_command"), paymentEntity.DateOfPayment, new
             {
-                BillId = paymentEntity.Id
+                PaymentId = paymentEntity.Id
             });
         }
 
-        private static async Task SendVisitRegisteredReturnEmailCommand(ConsumeContext<CalculateVisitBill> context, VisitEntity visitEntity,
+        private static async Task SendVisitRegisteredReturnEmailCommand(ConsumeContext<CalculateVisitPrice> context, VisitEntity visitEntity,
             PaymentEntity paymentEntity)
         {
             await context.Send<SendReturnEmail>(new Uri("queue:send_visit_registered_return_email_command"),
@@ -57,7 +57,7 @@ namespace eda.api.Services.PaymentService
                     visitEntity.VisitDate,
                     visitEntity.HospitalName,
                     DayOfPayment = paymentEntity.DateOfPayment,
-                    Bill = paymentEntity.VisitPrice
+                    VisitPrice = paymentEntity.VisitPrice
                 });
         }
 
@@ -66,7 +66,7 @@ namespace eda.api.Services.PaymentService
             var visitPrice = new Random().Next(100, 250);
             var hospitalCost = 100;
             var taxPercentage = 1.23;
-            return (visitPrice + hospitalCost) * taxPercentage;
+            return Math.Round(((visitPrice + hospitalCost) * taxPercentage), 2) ;
         }
     }
 }

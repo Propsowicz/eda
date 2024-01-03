@@ -6,6 +6,7 @@ using eda.api.Services.EmailService.NotificationEmail;
 using eda.api.Services.PaymentService;
 using eda.api.Services.PaymentService.CQRS;
 using eda.api.Services.VisitService;
+using eda.api.Services.VisitService.CQRS;
 using MassTransit;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
@@ -45,7 +46,7 @@ builder.Services.AddMediator(cfg =>
 {
     cfg.AddConsumer<PaymentQuery>();
     cfg.AddConsumer<PaymentCommand>();
-
+    cfg.AddConsumer<VisitQuery>();
 });
 
 builder.Services.AddMassTransit(x =>
@@ -67,20 +68,20 @@ builder.Services.AddMassTransit(x =>
     {
         cfg.UseDelayedMessageScheduler();
 
-        cfg.ReceiveEndpoint("publish_visit_notification_event", e =>
+        cfg.ReceiveEndpoint("visit_notification_event", e =>
         {
             e.ConfigureConsumer<SendNotificationEmailToDoctorBusiness>(ctx);
             e.ConfigureConsumer<SendNotificationEmailToHospitalBusiness>(ctx);
             e.UseRawJsonSerializer();
         });
 
-        cfg.ReceiveEndpoint("send_calculate_visit_bill_command", e =>
+        cfg.ReceiveEndpoint("calculate_visit_price_command", e =>
         {
             e.ConfigureConsumer<PaymentCalculateBusiness>(ctx);
             e.UseRawJsonSerializer();
         });
 
-        cfg.ReceiveEndpoint("send_send_payment_expiration_check_command", e =>
+        cfg.ReceiveEndpoint("check_if_payment_is_done_command", e =>
         {
             e.ConfigureConsumer<PaymentExpirationPaymentCheckBusiness>(ctx);
             e.UseRawJsonSerializer();
