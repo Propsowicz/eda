@@ -2,7 +2,7 @@
 
 namespace eda.api.Messages.Commands
 {
-    public class CheckIfPaymentIsDone : CorrelatedBy<Guid>
+    public class CheckIfPaymentExecuted : CorrelatedBy<Guid>
     {
         public Guid CorrelationId { get; set; }
 

@@ -3,19 +3,20 @@ using csStorage.Builder.csContextBuilder;
 using eda.api.Messages.Commands;
 using eda.api.Services.VisitService.Models;
 using MassTransit;
+using MassTransit.Mediator;
 using Serilog;
 using NewVisitRegistered = eda.api.Messages.Events.NewVisitRegistered;
 
-namespace eda.api.Services.VisitService
+namespace eda.api.Services.VisitService.CQRS
 {
-    public class VisitRegisterBusiness : IVisitRegisterBusiness
+    public class RegisterVisitCommand : MediatorRequestHandler<RegisterVisitRequestModel, RegisterVisitResponseModel>
     {
         private readonly ISendEndpointProvider _sendEndpointProvider;
         private readonly IPublishEndpoint _publishEndpoint;
         private readonly csContextBuilder<VisitEntity> _contextBuilder;
         private readonly ICorrelationContextAccessor _correlationContext;
 
-        public VisitRegisterBusiness(ISendEndpointProvider sendEndpointProvider, IPublishEndpoint publishEndpoint,
+        public RegisterVisitCommand(ISendEndpointProvider sendEndpointProvider, IPublishEndpoint publishEndpoint,
             ICorrelationContextAccessor correlationContext)
         {
             _sendEndpointProvider = sendEndpointProvider;
@@ -23,8 +24,7 @@ namespace eda.api.Services.VisitService
             _contextBuilder = new csContextBuilder<VisitEntity>();
             _correlationContext = correlationContext;
         }
-
-        public async Task<Guid> CommandHandler(VisitRequestModel request)
+        protected override async Task<RegisterVisitResponseModel> Handle(RegisterVisitRequestModel request, CancellationToken cancellationToken)
         {
             var entity = new VisitEntity
             {
@@ -43,7 +43,7 @@ namespace eda.api.Services.VisitService
                 await PublishVisitRegistrationEvent(entity, correlationId);
                 await SendCalculateVisitPriceCommand(entity, correlationId);
             }
-            return entity.Id;
+            return new RegisterVisitResponseModel { Id = entity.Id };
         }
 
         private async Task<bool> SaveVisitModel(VisitEntity entity)

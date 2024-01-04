@@ -21,6 +21,9 @@ namespace eda.api.Services.VisitService.CQRS
                 Id = visitEntity.Id,
                 VisitDate = visitEntity.VisitDate,
                 PatientName = visitEntity.PatientName,
+                PatientEmail = visitEntity.PatientEmail,
+                DoctorName = visitEntity.DoctorName,
+                HospitalName = visitEntity.HospitalName,
                 IsCancelled = visitEntity.IsCancelled
             });
         }

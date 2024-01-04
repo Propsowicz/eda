@@ -1,6 +1,8 @@
-﻿namespace eda.api.Services.VisitService.Models
+﻿using MassTransit.Mediator;
+
+namespace eda.api.Services.VisitService.Models
 {
-    public class VisitRequestModel
+    public class RegisterVisitRequestModel : Request<RegisterVisitResponseModel>
     {
         public DateTime VisitDate { get; set; }
 
@@ -9,7 +11,7 @@
         public string PatientEmail { get; set; } = default!;
 
         public string DoctorName { get; set; } = default!;
-        
+
         public string HospitalName { get; set; } = default!;
     }
 }

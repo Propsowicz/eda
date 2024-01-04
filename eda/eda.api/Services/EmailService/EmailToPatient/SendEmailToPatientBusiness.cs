@@ -4,7 +4,7 @@ using MassTransit;
 
 namespace eda.api.Services.EmailService.EmailToPatient;
 
-public class SendEmailToPatientBusiness : IConsumer<SendReturnEmail>, IConsumer<SendPaymentExpirationEmail>
+public class SendEmailToPatientBusiness : IConsumer<SendReturnEmail>, IConsumer<SendVisitCancelledEmail>
 {
     private readonly IEmailService _emailService;
 
@@ -21,9 +21,9 @@ public class SendEmailToPatientBusiness : IConsumer<SendReturnEmail>, IConsumer<
         _emailService.SendEmail(toEmail, msg);
     }
 
-    public async Task Consume(ConsumeContext<SendPaymentExpirationEmail> context)
+    public async Task Consume(ConsumeContext<SendVisitCancelledEmail> context)
     {
-        var toEmail = context.Message.PatientName;
+        var toEmail = context.Message.PatientEmail;
         var msg = $"Your visit has been cancelled due to the {context.Message.CancellationReason}.";
 
         _emailService.SendEmail(toEmail, msg);

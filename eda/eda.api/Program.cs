@@ -39,7 +39,6 @@ builder.Services.AddOpenTelemetry()
                 });
             });
 
-builder.Services.AddScoped<IVisitRegisterBusiness, VisitRegisterBusiness>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 
 builder.Services.AddMediator(cfg =>
@@ -47,20 +46,22 @@ builder.Services.AddMediator(cfg =>
     cfg.AddConsumer<PaymentQuery>();
     cfg.AddConsumer<PaymentCommand>();
     cfg.AddConsumer<VisitQuery>();
+    cfg.AddConsumer<RegisterVisitCommand>();
 });
 
 builder.Services.AddMassTransit(x =>
 {
     x.SetSnakeCaseEndpointNameFormatter();
 
-    // publish
+    // events
     x.AddConsumer<SendNotificationEmailToDoctorBusiness>();
     x.AddConsumer<SendNotificationEmailToHospitalBusiness>();
 
-    // send
+    // commands
     x.AddConsumer<PaymentCalculateBusiness>();
-    x.AddConsumer<PaymentExpirationPaymentCheckBusiness>();
+    x.AddConsumer<PaymentExecutionCheckBusiness>();
     x.AddConsumer<SendEmailToPatientBusiness>();
+    x.AddConsumer<UpdateVisitCommand>();
 
     x.AddDelayedMessageScheduler();
 
@@ -81,9 +82,9 @@ builder.Services.AddMassTransit(x =>
             e.UseRawJsonSerializer();
         });
 
-        cfg.ReceiveEndpoint("check_if_payment_is_done_command", e =>
+        cfg.ReceiveEndpoint("check_if_payment_executed_command", e =>
         {
-            e.ConfigureConsumer<PaymentExpirationPaymentCheckBusiness>(ctx);
+            e.ConfigureConsumer<PaymentExecutionCheckBusiness>(ctx);
             e.UseRawJsonSerializer();
         });
         
@@ -96,6 +97,12 @@ builder.Services.AddMassTransit(x =>
         cfg.ReceiveEndpoint("send_visit_cancelled_email_command", e =>
         {
             e.ConfigureConsumer<SendEmailToPatientBusiness>(ctx);
+            e.UseRawJsonSerializer();
+        });
+
+        cfg.ReceiveEndpoint("cancel_visit_command", e =>
+        {
+            e.ConfigureConsumer<UpdateVisitCommand>(ctx);
             e.UseRawJsonSerializer();
         });
     });

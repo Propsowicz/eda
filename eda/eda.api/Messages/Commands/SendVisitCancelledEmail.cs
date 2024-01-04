@@ -3,7 +3,7 @@ using MassTransit;
 
 namespace eda.api.Messages.Commands
 {
-    public class SendPaymentExpirationEmail : CorrelatedBy<Guid>
+    public class SendVisitCancelledEmail : CorrelatedBy<Guid>
     {
         public Guid CorrelationId { get; set; }
 
@@ -12,6 +12,8 @@ namespace eda.api.Messages.Commands
         public DateTime VisitDate { get; set; }
 
         public string PatientName { get; set; } = default!;
+
+        public string PatientEmail { get; set; } = default!;
 
         public string DoctorName { get; set; } = default!;
 
