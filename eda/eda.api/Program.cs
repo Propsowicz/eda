@@ -5,7 +5,6 @@ using eda.api.Services.EmailService.EmailToPatient;
 using eda.api.Services.EmailService.NotificationEmail;
 using eda.api.Services.PaymentService;
 using eda.api.Services.PaymentService.CQRS;
-using eda.api.Services.VisitService;
 using eda.api.Services.VisitService.CQRS;
 using MassTransit;
 using OpenTelemetry.Resources;
@@ -27,17 +26,17 @@ builder.Services.AddDefaultCorrelationId(ctx =>
 });
 
 builder.Services.AddOpenTelemetry()
-            .ConfigureResource(r => r.AddService("eda.api"))
-            .WithTracing(builder =>
-            {
-                builder.AddAspNetCoreInstrumentation();
-                builder.AddHttpClientInstrumentation();
-                builder.AddSource("MassTransit");
-                builder.AddOtlpExporter(otelOptions =>
-                {
-                    otelOptions.Endpoint = new Uri("http://localhost:4317");
-                });
-            });
+    .ConfigureResource(r => r.AddService("eda.api"))
+    .WithTracing(builder =>
+    {
+        builder.AddAspNetCoreInstrumentation();
+        builder.AddHttpClientInstrumentation();
+        builder.AddSource("MassTransit");
+        builder.AddOtlpExporter(otelOptions =>
+        {
+            otelOptions.Endpoint = new Uri("http://localhost:4317");
+        });
+    });
 
 builder.Services.AddScoped<IEmailService, EmailService>();
 

@@ -43,6 +43,7 @@ namespace eda.api.Services.PaymentService
         {
             await context.ScheduleSend<CheckIfPaymentExecuted>(new Uri("queue:check_if_payment_executed_command"), paymentEntity.DateOfPayment, new
             {
+                CorrelationId = context.Message.CorrelationId,
                 PaymentId = paymentEntity.Id
             });
         }

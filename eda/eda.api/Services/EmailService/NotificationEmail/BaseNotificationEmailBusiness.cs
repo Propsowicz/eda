@@ -1,5 +1,4 @@
 ﻿using eda.api.Messages.Events;
-using eda.api.Services.EmailService;
 using MassTransit;
 
 namespace eda.api.Services.EmailService.NotificationEmail

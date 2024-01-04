@@ -5,6 +5,8 @@ VisualStudioVersion = 17.7.34031.279
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "eda.api", "eda.api\eda.api.csproj", "{F40AE759-F1C9-4D28-8745-98B7288D2643}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tests", "tests\tests.csproj", "{B735D407-0448-4DE0-8918-1482C7532BA4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{F40AE759-F1C9-4D28-8745-98B7288D2643}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F40AE759-F1C9-4D28-8745-98B7288D2643}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F40AE759-F1C9-4D28-8745-98B7288D2643}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B735D407-0448-4DE0-8918-1482C7532BA4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B735D407-0448-4DE0-8918-1482C7532BA4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B735D407-0448-4DE0-8918-1482C7532BA4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B735D407-0448-4DE0-8918-1482C7532BA4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
