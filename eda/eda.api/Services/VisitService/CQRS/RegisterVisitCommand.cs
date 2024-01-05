@@ -37,7 +37,7 @@ namespace eda.api.Services.VisitService.CQRS
                 IsCancelled = false
             };
 
-            if (await SaveVisitModel(entity))
+            if (await SaveVisitEntity(entity))
             {
                 var correlationId = Guid.Parse(_correlationContext.CorrelationContext.CorrelationId);
                 await PublishVisitRegistrationEvent(entity, correlationId);
@@ -46,7 +46,7 @@ namespace eda.api.Services.VisitService.CQRS
             return new RegisterVisitResponseModel { Id = entity.Id };
         }
 
-        private async Task<bool> SaveVisitModel(VisitEntity entity)
+        private async Task<bool> SaveVisitEntity(VisitEntity entity)
         {
             try
             {

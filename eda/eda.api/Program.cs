@@ -3,6 +3,7 @@ using CorrelationId.DependencyInjection;
 using eda.api.Services.EmailService;
 using eda.api.Services.EmailService.EmailToPatient;
 using eda.api.Services.EmailService.NotificationEmail;
+using eda.api.Services.ExceptionService;
 using eda.api.Services.PaymentService;
 using eda.api.Services.PaymentService.CQRS;
 using eda.api.Services.VisitService.CQRS;
@@ -55,17 +56,41 @@ builder.Services.AddMassTransit(x =>
     // events
     x.AddConsumer<SendNotificationEmailToDoctorBusiness>();
     x.AddConsumer<SendNotificationEmailToHospitalBusiness>();
+    x.AddConsumer<ExceptionsConsumer>();
 
     // commands
     x.AddConsumer<PaymentCalculateBusiness>();
     x.AddConsumer<PaymentExecutionCheckBusiness>();
     x.AddConsumer<SendEmailToPatientBusiness>();
     x.AddConsumer<UpdateVisitCommand>();
+    x.AddConsumer<ExceptionBusinessSamples>();
 
     x.AddDelayedMessageScheduler();
 
     x.UsingRabbitMq((ctx, cfg) =>
     {
+        #region Retry Policy
+
+        cfg.UseDelayedRedelivery(r =>
+        {
+            r.Interval(1, TimeSpan.FromSeconds(10));
+            r.Ignore(typeof(DivideByZeroException));
+        });
+
+        cfg.UseMessageRetry(r =>
+        {
+            r.Interval(3, TimeSpan.FromSeconds(3));
+            r.Ignore(typeof(DivideByZeroException));
+        });
+
+        cfg.ReceiveEndpoint("exception_command_failed_event", e =>
+        {
+            e.ConfigureConsumer<ExceptionsConsumer>(ctx);
+            e.UseRawJsonSerializer();
+        });
+
+        #endregion
+
         cfg.UseDelayedMessageScheduler();
 
         cfg.ReceiveEndpoint("visit_notification_event", e =>
@@ -102,6 +127,12 @@ builder.Services.AddMassTransit(x =>
         cfg.ReceiveEndpoint("cancel_visit_command", e =>
         {
             e.ConfigureConsumer<UpdateVisitCommand>(ctx);
+            e.UseRawJsonSerializer();
+        });
+        
+        cfg.ReceiveEndpoint("exception_command", e =>
+        {
+            e.ConfigureConsumer<ExceptionBusinessSamples>(ctx);
             e.UseRawJsonSerializer();
         });
     });
