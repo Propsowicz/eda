@@ -2,26 +2,31 @@
 using eda.api.Messages.Commands;
 using eda.api.Services.VisitService.Models;
 using MassTransit;
-using MassTransit.Mediator;
 
 namespace eda.api.Services.PaymentService
 {
     public class PaymentCalculateBusiness : IConsumer<CalculateVisitPrice>
     {
-        private readonly int _expirationSeconds = 60;
+        private readonly int _expirationSeconds = 10;
 
         private readonly csContextBuilder<PaymentEntity> _contextPaymentEntityBuilder;
-        private readonly IMediator _mediator;
+        private readonly IRequestClient<Messages.Commands.VisitQueryRequestModel> _requestClient;
 
-        public PaymentCalculateBusiness(IMediator mediator)
+        public PaymentCalculateBusiness(IRequestClient<Messages.Commands.VisitQueryRequestModel> requestClient)
         {
-            _mediator = mediator;
             _contextPaymentEntityBuilder = new csContextBuilder<PaymentEntity>();
+            _requestClient = requestClient;
         }
 
         public async Task Consume(ConsumeContext<CalculateVisitPrice> context)
         {
-            var visitModel = await _mediator.SendRequest(new VisitQueryRequestModel { Id = context.Message.VisitId });
+            var response = await _requestClient.GetResponse<VisitQueryResponseModel>(new Messages.Commands.VisitQueryRequestModel 
+            { 
+                CorrelationId = context.CorrelationId.Value,
+                Id = context.Message.VisitId 
+            });
+            var visitModel = response.Message;
+
             var visitPrice = CalculatePrice();
             var dateOfPayment = DateTime.UtcNow.AddSeconds(_expirationSeconds);
 

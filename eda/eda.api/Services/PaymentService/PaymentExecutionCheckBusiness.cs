@@ -3,19 +3,18 @@ using eda.api.Messages.Commands;
 using eda.api.Messages.Events;
 using eda.api.Services.VisitService.Models;
 using MassTransit;
-using MassTransit.Mediator;
 
 namespace eda.api.Services.PaymentService
 {
     public class PaymentExecutionCheckBusiness : IConsumer<CheckIfPaymentExecuted>
     {
         private readonly csContextBuilder<PaymentEntity> _contextPaymentEntityBuilder;
-        private readonly IMediator _mediator;
+        private readonly IRequestClient<Messages.Commands.VisitQueryRequestModel> _requestClient;
 
-        public PaymentExecutionCheckBusiness(IMediator mediator)
+        public PaymentExecutionCheckBusiness(IRequestClient<Messages.Commands.VisitQueryRequestModel> requestClient)
         {
-            _mediator = mediator;
             _contextPaymentEntityBuilder = new csContextBuilder<PaymentEntity>();
+            _requestClient = requestClient;
         }
 
         public async Task Consume(ConsumeContext<CheckIfPaymentExecuted> context)
@@ -24,7 +23,13 @@ namespace eda.api.Services.PaymentService
 
             if (!paymentEntity.IsPayed)
             {
-                var visitModel = await _mediator.SendRequest(new VisitQueryRequestModel { Id = paymentEntity.VisitId });
+                var response = await _requestClient.GetResponse<VisitQueryResponseModel>(new Messages.Commands.VisitQueryRequestModel 
+                { 
+                    CorrelationId = context.CorrelationId.Value,
+                    Id = paymentEntity.VisitId 
+                });
+                var visitModel = response.Message;
+
                 await CancelVisitCommand(context, visitModel.Id);
 
                 await PublishVisitCancelledEvent(context, visitModel);

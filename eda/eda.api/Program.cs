@@ -7,6 +7,7 @@ using eda.api.Services.ExceptionService;
 using eda.api.Services.PaymentService;
 using eda.api.Services.PaymentService.CQRS;
 using eda.api.Services.VisitService.CQRS;
+using eda.api.Services.VisitService.Models;
 using MassTransit;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
@@ -45,14 +46,14 @@ builder.Services.AddMediator(cfg =>
 {
     cfg.AddConsumer<PaymentQuery>();
     cfg.AddConsumer<PaymentCommand>();
-    cfg.AddConsumer<VisitQuery>();
+    cfg.AddConsumer<VisitQueryCqrs>();
     cfg.AddConsumer<RegisterVisitCommand>();
 });
 
 builder.Services.AddMassTransit(x =>
 {
     x.SetSnakeCaseEndpointNameFormatter();
-
+    
     // events
     x.AddConsumer<SendNotificationEmailToDoctorBusiness>();
     x.AddConsumer<SendNotificationEmailToHospitalBusiness>();
@@ -64,6 +65,7 @@ builder.Services.AddMassTransit(x =>
     x.AddConsumer<SendEmailToPatientBusiness>();
     x.AddConsumer<UpdateVisitCommand>();
     x.AddConsumer<ExceptionBusinessSamples>();
+    x.AddConsumer<VisitQueryRequestResponse>();
 
     x.AddDelayedMessageScheduler();
 
@@ -86,54 +88,53 @@ builder.Services.AddMassTransit(x =>
         cfg.ReceiveEndpoint("exception_command_failed_event", e =>
         {
             e.ConfigureConsumer<ExceptionsConsumer>(ctx);
-            e.UseRawJsonSerializer();
         });
 
         #endregion
 
+        cfg.UseRawJsonSerializer();
+
         cfg.UseDelayedMessageScheduler();
+
+        cfg.ReceiveEndpoint("get_visit_model_command", e =>
+        {            
+            e.ConfigureConsumer<VisitQueryRequestResponse>(ctx);
+        });               
 
         cfg.ReceiveEndpoint("visit_notification_event", e =>
         {
             e.ConfigureConsumer<SendNotificationEmailToDoctorBusiness>(ctx);
             e.ConfigureConsumer<SendNotificationEmailToHospitalBusiness>(ctx);
-            e.UseRawJsonSerializer();
         });
 
         cfg.ReceiveEndpoint("calculate_visit_price_command", e =>
         {
             e.ConfigureConsumer<PaymentCalculateBusiness>(ctx);
-            e.UseRawJsonSerializer();
         });
 
         cfg.ReceiveEndpoint("check_if_payment_executed_command", e =>
         {
             e.ConfigureConsumer<PaymentExecutionCheckBusiness>(ctx);
-            e.UseRawJsonSerializer();
         });
         
         cfg.ReceiveEndpoint("send_visit_registered_return_email_command", e =>
         {
             e.ConfigureConsumer<SendEmailToPatientBusiness>(ctx);
-            e.UseRawJsonSerializer();
         });        
         
         cfg.ReceiveEndpoint("send_visit_cancelled_email_command", e =>
         {
             e.ConfigureConsumer<SendEmailToPatientBusiness>(ctx);
-            e.UseRawJsonSerializer();
         });
 
         cfg.ReceiveEndpoint("cancel_visit_command", e =>
         {
             e.ConfigureConsumer<UpdateVisitCommand>(ctx);
-            e.UseRawJsonSerializer();
         });
         
         cfg.ReceiveEndpoint("exception_command", e =>
         {
             e.ConfigureConsumer<ExceptionBusinessSamples>(ctx);
-            e.UseRawJsonSerializer();
         });
     });
 
